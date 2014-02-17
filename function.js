@@ -11,14 +11,17 @@
 (function(define) {
 define(function(require) {
 
-	var when, slice;
+	var when, slice, tryCall, _liftAll;
 
 	when = require('./when');
+	tryCall = when['try'];
+	_liftAll = require('./lib/liftAll');
 	slice = Array.prototype.slice;
 
 	return {
 		lift: lift,
-		call: when['try'],
+		liftAll: liftAll,
+		call: tryCall,
 		apply: apply,
 		compose: compose
 	};
@@ -33,8 +36,8 @@ define(function(require) {
 	 */
 	function apply(func, promisedArgs) {
 		return arguments.length > 1
-			? when['try'].apply(this, [func].concat(promisedArgs))
-			: when['try'].call(this, func);
+			? tryCall.apply(this, [func].concat(promisedArgs))
+			: tryCall.call(this, func);
 	}
 
 	/**
@@ -54,8 +57,12 @@ define(function(require) {
 		return function() {
 			args.unshift(func);
 			args.push.apply(args, slice.call(arguments));
-			return when['try'].apply(this, args);
+			return tryCall.apply(this, args);
 		};
+	}
+
+	function liftAll(targetObj, namer) {
+		return _liftAll(targetObj, lift, namer);
 	}
 
 	/**
